@@ -90,7 +90,7 @@ class Price implements IProxable
 	/**
 	 * @return float|null If price is combined from prices with different tax rates, resulting tax rate is null
 	 */
-	public function getTaxRate()
+	public function getTaxRate(): ?float
 	{
 		return $this->taxRate;
 	}
@@ -122,7 +122,7 @@ class Price implements IProxable
 	/**
 	 * @param bool $defaultPriceIncludesTax
 	 */
-	public function setDefaultPriceIncludesTax(bool $defaultPriceIncludesTax)
+	public function setDefaultPriceIncludesTax(bool $defaultPriceIncludesTax): void
 	{
 		$this->defaultPrice = $defaultPriceIncludesTax ? $this->withTax : $this->withoutTax;
 		$this->defaultPriceIncludesTax = $defaultPriceIncludesTax;
@@ -159,7 +159,7 @@ class Price implements IProxable
 	 * @param float $coef
 	 * @return Price
 	 */
-	public function divide(float $coef)
+	public function divide(float $coef): Price
 	{
 		$this->assertDivisionCoef($coef);
 		return $this->multiply(1 / $coef);
@@ -169,7 +169,7 @@ class Price implements IProxable
 	 * @param Price $price
 	 * @return Price
 	 */
-	public function add(Price $price)
+	public function add(Price $price): Price
 	{
 		$this->assertSameCurrency($price, $this);
 		$this->assertPrice($price, $this);
@@ -187,7 +187,7 @@ class Price implements IProxable
 	 * @param Price $price
 	 * @return Price
 	 */
-	public function subtract(Price $price)
+	public function subtract(Price $price): Price
 	{
 		$this->assertSameCurrency($price, $this);
 		$this->assertPrice($price, $this);
@@ -211,7 +211,7 @@ class Price implements IProxable
 	 * @param string $type
 	 * @return Price
 	 */
-	public function discount(float $amount, string $type)
+	public function discount(float $amount, string $type): Price
 	{
 		$this->assertDiscountType($type);
 		$this->assertDiscountAmount($amount);
@@ -231,7 +231,7 @@ class Price implements IProxable
 	/**
 	 * @return Price
 	 */
-	public function zeroize()
+	public function zeroize(): Price
 	{
 		return new self(0, $this->defaultPriceIncludesTax, $this->taxRate ?? 0, $this->currency);
 	}
@@ -241,7 +241,7 @@ class Price implements IProxable
 	 * @param float $taxRate
 	 * @return Price
 	 */
-	public function modify(float $price, float $taxRate = null)
+	public function modify(float $price, float $taxRate = null): Price
 	{
 		$taxRate = $taxRate ?? $this->taxRate;
 		$this->assertTaxRate($taxRate);
@@ -306,15 +306,16 @@ class Price implements IProxable
 	 * @param Price $price
 	 * @return bool
 	 */
-	public function isGreaterThan(Price $price)
+	public function isHigherThan(Price $price): bool
 	{
+		$this->assertSameCurrency($price, $this);
 		return $this->defaultPrice > $price->getDefaultPrice();
 	}
 
 	/**
 	 * @return bool
 	 */
-	public function isZero()
+	public function isZero(): bool
 	{
 		return $this->defaultPrice == 0
 			&& $this->withoutTax == 0
@@ -325,7 +326,7 @@ class Price implements IProxable
 	/**
 	 * @return string
 	 */
-	public function __toString()
+	public function __toString(): string
 	{
 		return (string)$this->defaultPrice;
 	}
@@ -334,7 +335,7 @@ class Price implements IProxable
 	 * @param Price $price
 	 * @return Price
 	 */
-	private function fromPrice(Price $price)
+	private function fromPrice(Price $price): Price
 	{
 		$newPrice = clone $this;
 		if ($newPrice->isZero()) {
@@ -352,7 +353,7 @@ class Price implements IProxable
 	 * @throws \InvalidArgumentException
 	 * @throws \LogicException
 	 */
-	private function assertTaxRate($taxRate)
+	private function assertTaxRate($taxRate): void
 	{
 		if ($taxRate < 0) {
 			throw new \InvalidArgumentException(sprintf('Tax rate must be grater than zero, %s given', $taxRate));
@@ -366,7 +367,7 @@ class Price implements IProxable
 	 * @param Price $b
 	 * @throws \LogicException
 	 */
-	private function assertPrice(Price $a, Price $b)
+	private function assertPrice(Price $a, Price $b): void
 	{
 		if (!$a->isZero() && !$b->isZero() && $a->defaultPriceIncludesTax() !== $b->defaultPriceIncludesTax()) {
 			throw new \LogicException('Cannot combine default price with and without tax');
@@ -378,7 +379,7 @@ class Price implements IProxable
 	 * @param Price $b
 	 * @throws \LogicException
 	 */
-	private function assertSameCurrency(Price $a, Price $b)
+	private function assertSameCurrency(Price $a, Price $b): void
 	{
 		if (!$a->getCurrency()->equals($b->getCurrency())) {
 			throw new \LogicException('Cannot combine prices with different currencies');
@@ -389,7 +390,7 @@ class Price implements IProxable
 	 * @param string $type
 	 * @throws \InvalidArgumentException
 	 */
-	private function assertDiscountType(string $type)
+	private function assertDiscountType(string $type): void
 	{
 		if ($type !== \Core\Domain\Model\Price\Discount::NOMINAL && $type !== \Core\Domain\Model\Price\Discount::PERCENTUAL) {
 			throw new \InvalidArgumentException(sprintf('Invalid discount type "%s"', $type));
@@ -400,7 +401,7 @@ class Price implements IProxable
 	 * @param float $amount
 	 * @throws \InvalidArgumentException
 	 */
-	private function assertDiscountAmount(float $amount)
+	private function assertDiscountAmount(float $amount): void
 	{
 		if ($amount < 0) {
 			throw new \InvalidArgumentException(sprintf('Invalid discount amount "%s"', $amount));
@@ -411,7 +412,7 @@ class Price implements IProxable
 	 * @param float $coef
 	 * @throws \InvalidArgumentException
 	 */
-	private function assertDivisionCoef(float $coef)
+	private function assertDivisionCoef(float $coef): void
 	{
 		if ($coef <= 0) {
 			throw new \InvalidArgumentException(sprintf(
@@ -425,9 +426,9 @@ class Price implements IProxable
 	 * @param float $exchangeRate
 	 * @throws \Exception
 	 */
-	private function assertConversionParams(Currency $currency, float $exchangeRate)
+	private function assertConversionParams(Currency $currency, float $exchangeRate): void
 	{
-		if ($currency->equals($this->currency) && $exchangeRate != 1) {
+		if ($currency->equals($this->currency) && $exchangeRate !== 1) {
 			throw new \Exception(sprintf(
 				'Conversion request mismatch. Currency cannot be the same while conversion rate is %s', $exchangeRate
 			));
@@ -448,7 +449,7 @@ class Price implements IProxable
 	/**
 	 * @return float
 	 */
-	private function getTaxCoef()
+	private function getTaxCoef(): float
 	{
 		return round($this->taxRate / (100 + $this->taxRate), self::VAT_COEF_PRECISION);
 	}
@@ -466,7 +467,7 @@ class Price implements IProxable
 	 * @param bool $includesTax
 	 * @return Price
 	 */
-	public static function zero(Currency $currency, bool $includesTax = false)
+	public static function zero(Currency $currency, bool $includesTax = false): Price
 	{
 		return new self(0, $includesTax, 0, $currency);
 	}

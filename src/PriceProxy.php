@@ -16,22 +16,6 @@ class PriceProxy extends ProxyObject
 
 
 	/**
-	 * @return bool
-	 */
-	public function isPriceFrom(): bool
-	{
-		return $this->isPriceFrom;
-	}
-
-	/**
-	 * @param bool $isPriceFrom
-	 */
-	public function setIsPriceFrom(bool $isPriceFrom)
-	{
-		$this->isPriceFrom = $isPriceFrom;
-	}
-
-	/**
 	 * @return float
 	 */
 	public function getWith_tax(): float
@@ -64,6 +48,35 @@ class PriceProxy extends ProxyObject
 	}
 
 	/**
+	 * @param $price
+	 * @return bool
+	 */
+	public function equals($price): bool
+	{
+		return $this->parent->equals($price->getParent());
+	}
+
+	/********************************************************************/
+	/******************* Helpers (not present in twig) ******************/
+	/********************************************************************/
+
+	/**
+	 * @return bool
+	 */
+	public function isPriceFrom(): bool
+	{
+		return $this->isPriceFrom;
+	}
+
+	/**
+	 * @param bool $isPriceFrom
+	 */
+	public function setIsPriceFrom(bool $isPriceFrom)
+	{
+		$this->isPriceFrom = $isPriceFrom;
+	}
+
+	/**
 	 * @return float
 	 */
 	public function getDefaultPrice(): float
@@ -84,7 +97,15 @@ class PriceProxy extends ProxyObject
 	 */
 	public function __toString(): string
 	{
-		return (string) $this->parent->getDefaultPrice();
+		return (string)$this->__toFloat();
+	}
+
+	/**
+	 * @return float
+	 */
+	public function __toFloat(): float
+	{
+		return $this->parent->getDefaultPrice();
 	}
 
 	/**
@@ -105,8 +126,9 @@ class PriceProxy extends ProxyObject
 			'without_tax',
 			'tax',
 			'tax_rate',
-			'default',
 			'currency',
+			//comparators
+			'equals',
 		];
 	}
 }
