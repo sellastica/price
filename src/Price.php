@@ -296,7 +296,7 @@ class Price implements IProxable
 	 */
 	public function equals(Price $price)
 	{
-		return $this->withoutTax == $price->getWithoutTax()
+		return $this->withoutTax == $price->getWithoutTax() //==
 			&& $this->taxRate == $price->getTaxRate()
 			&& $this->withTax == $price->getWithTax()
 			&& $this->currency->equals($price->getCurrency());
@@ -428,7 +428,7 @@ class Price implements IProxable
 	 */
 	private function assertConversionParams(Currency $currency, float $exchangeRate): void
 	{
-		if ($currency->equals($this->currency) && $exchangeRate !== 1) {
+		if ($currency->equals($this->currency) && $exchangeRate != 1) { //!= floating point comparison
 			throw new \Exception(sprintf(
 				'Conversion request mismatch. Currency cannot be the same while conversion rate is %s', $exchangeRate
 			));

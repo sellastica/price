@@ -47,14 +47,6 @@ class PriceProxy extends ProxyObject
 		return $this->parent->getTaxRate();
 	}
 
-	/**
-	 * @param $price
-	 * @return bool
-	 */
-	public function equals($price): bool
-	{
-		return $this->parent->equals($price->getParent());
-	}
 
 	/********************************************************************/
 	/******************* Helpers (not present in twig) ******************/
@@ -127,8 +119,6 @@ class PriceProxy extends ProxyObject
 			'tax',
 			'tax_rate',
 			'currency',
-			//comparators
-			'equals',
 		];
 	}
 }
