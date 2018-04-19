@@ -3,14 +3,11 @@ namespace Sellastica\Price;
 
 use Sellastica\Localization\Model\Currency;
 use Sellastica\Twig\Model\IProxable;
-use Sellastica\Price\PriceProxy;
-use Sellastica\Utils\Strings;
 use Sellastica\Twig\Model\ProxyConverter;
+use Sellastica\Utils\Strings;
 
 class Price implements IProxable
 {
-	const VAT_COEF_PRECISION = 4;
-
 	/** @var float */
 	private $withoutTax;
 	/** @var float */
@@ -45,13 +42,17 @@ class Price implements IProxable
 
 		if (true === $this->defaultPriceIncludesTax) {
 			$this->withTax = $this->defaultPrice;
-			$this->tax = $this->round($this->defaultPrice * $this->getTaxCoef());
-			$this->withoutTax = $this->withTax - $this->tax;
+			$this->withoutTax = $this->withTax / (1 + $taxRate / 100);
+			$this->tax = $this->withTax - $this->withoutTax;
 		} else {
 			$this->withoutTax = $this->defaultPrice;
-			$this->tax = $this->round($this->withoutTax * $this->taxRate / 100);
-			$this->withTax = $this->withoutTax + $this->tax;
+			$this->withTax = $this->withoutTax * (1 + $taxRate / 100);
+			$this->tax = $this->withTax - $this->withoutTax;
 		}
+
+		$this->withoutTax = $this->round($this->withoutTax);
+		$this->withTax = $this->round($this->withTax);
+		$this->tax = $this->round($this->tax);
 	}
 
 	/**
@@ -444,14 +445,6 @@ class Price implements IProxable
 		$price = $this->currency->round($price);
 		//change minus zero to zero
 		return $price != 0 ? $price : 0; //!=
-	}
-
-	/**
-	 * @return float
-	 */
-	private function getTaxCoef(): float
-	{
-		return round($this->taxRate / (100 + $this->taxRate), self::VAT_COEF_PRECISION);
 	}
 
 	/**

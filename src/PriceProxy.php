@@ -47,6 +47,13 @@ class PriceProxy extends ProxyObject
 		return $this->parent->getTaxRate();
 	}
 
+	/**
+	 * @return float
+	 */
+	public function getDefault(): float
+	{
+		return $this->parent->getDefaultPrice();
+	}
 
 	/********************************************************************/
 	/******************* Helpers (not present in twig) ******************/
@@ -63,17 +70,9 @@ class PriceProxy extends ProxyObject
 	/**
 	 * @param bool $isPriceFrom
 	 */
-	public function setIsPriceFrom(bool $isPriceFrom)
+	public function setIsPriceFrom(bool $isPriceFrom): void
 	{
 		$this->isPriceFrom = $isPriceFrom;
-	}
-
-	/**
-	 * @return float
-	 */
-	public function getDefaultPrice(): float
-	{
-		return $this->parent->getDefaultPrice();
 	}
 
 	/**
@@ -114,11 +113,12 @@ class PriceProxy extends ProxyObject
 	public function getAllowedProperties(): array
 	{
 		return [
-			'with_tax',
-			'without_tax',
+			'currency',
+			'default',
 			'tax',
 			'tax_rate',
-			'currency',
+			'with_tax',
+			'without_tax',
 		];
 	}
 }
