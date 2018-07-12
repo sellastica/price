@@ -173,7 +173,7 @@ class Price implements IProxable
 	public function add(Price $price): Price
 	{
 		$this->assertSameCurrency($price, $this);
-		$this->assertPrice($price, $this);
+		$price = $this->normalizePrice($price, $this);
 
 		$newPrice = $this->fromPrice($price);
 		$newPrice->defaultPrice += Strings::floatify($price->getDefaultPrice());
@@ -191,7 +191,8 @@ class Price implements IProxable
 	public function subtract(Price $price): Price
 	{
 		$this->assertSameCurrency($price, $this);
-		$this->assertPrice($price, $this);
+		$price = $this->normalizePrice($price, $this);
+
 		$newPrice = $this->fromPrice($price);
 		$newPrice->defaultPrice -= Strings::floatify($price->getDefaultPrice());
 		$newPrice->withoutTax -= Strings::floatify($price->getWithoutTax());
@@ -205,6 +206,19 @@ class Price implements IProxable
 		$newPrice->tax = $this->round($newPrice->tax);
 
 		return $newPrice;
+	}
+
+	/**
+	 * @return Price
+	 */
+	public function switchTaxIncluding(): Price
+	{
+		return new Price(
+			$this->defaultPriceIncludesTax ? $this->withoutTax : $this->withTax,
+			!$this->defaultPriceIncludesTax,
+			$this->taxRate,
+			$this->currency
+		);
 	}
 
 	/**
@@ -364,15 +378,19 @@ class Price implements IProxable
 	}
 
 	/**
-	 * @param Price $a
-	 * @param Price $b
-	 * @throws \LogicException
+	 * @param Price $price
+	 * @param Price $pattern
+	 * @return Price
 	 */
-	private function assertPrice(Price $a, Price $b): void
+	private function normalizePrice(Price $price, Price $pattern): Price
 	{
-		if (!$a->isZero() && !$b->isZero() && $a->defaultPriceIncludesTax() !== $b->defaultPriceIncludesTax()) {
-			throw new \LogicException('Cannot combine default price with and without tax');
+		if (!$price->isZero()
+			&& !$pattern->isZero()
+			&& $price->defaultPriceIncludesTax() !== $pattern->defaultPriceIncludesTax()) {
+			$price->switchTaxIncluding();
 		}
+
+		return $price;
 	}
 
 	/**
