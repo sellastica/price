@@ -6,7 +6,7 @@ use Sellastica\Twig\Model\IProxable;
 use Sellastica\Twig\Model\ProxyConverter;
 use Sellastica\Utils\Strings;
 
-class Price implements IProxable
+class Price implements IProxable, \MongoDB\BSON\Serializable
 {
 	/** @var float */
 	private $withoutTax;
@@ -471,6 +471,19 @@ class Price implements IProxable
 	public function toProxy(): PriceProxy
 	{
 		return ProxyConverter::convert($this, PriceProxy::class);
+	}
+
+	/**
+	 * @return array
+	 */
+	public function bsonSerialize(): array
+	{
+		return [
+			'price' => $this->defaultPrice,
+			'includesTax' => $this->defaultPriceIncludesTax,
+			'taxRate' => $this->taxRate,
+			'currency' => $this->currency->getCode(),
+		];
 	}
 
 	/**
